@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Project {
+  ID          Int        @id @default(autoincrement())
+  ProjectCode String
+  CreatedDate DateTime   @default(now())
+  UpdatedDate DateTime   @updatedAt
+
+  Questions Question[]
+}
+
+model QuestionType {
+  ID       Int        @id @default(autoincrement())
+  TypeCode String
+  TypeName String
+
+  Questions Question[]
+}
+
+model Question {
+  ID             Int          @id @default(autoincrement())
+  ProjectID      Int
+  QuestionTypeID Int
+  QuestionCode   String
+  QuestionText   String
+  CreatedDate    DateTime     @default(now())
+  UpdatedDate    DateTime     @updatedAt
+
+  Project       Project       @relation(fields: [ProjectID], references: [ID])
+  QuestionType  QuestionType  @relation(fields: [QuestionTypeID], references: [ID])
+
+  Options       QuestionOption[]
+  Logic         QuestionLogic[]
+  Rows          QuestionRow[]
+  Columns       QuestionColumn[]
+  Settings      QuestionSettings?
+}
+
+model QuestionOption {
+  ID           Int      @id @default(autoincrement())
+  QuestionID   Int
+  Value        String
+  OptionText   String
+  IsExclusive  Boolean  @default(false)
+
+  Question Question @relation(fields: [QuestionID], references: [ID])
+
+  Logic QuestionLogic[]
+}
+
+model QuestionLogic {
+  ID         Int    @id @default(autoincrement())
+  QuestionID Int
+  OptionID   Int
+  ActionType String
+
+  Question Question       @relation(fields: [QuestionID], references: [ID])
+  Option   QuestionOption @relation(fields: [OptionID], references: [ID])
+}
+
+model QuestionRow {
+  ID           Int    @id @default(autoincrement())
+  QuestionID   Int
+  RowCode      String
+  RowText      String
+  DisplayOrder Int
+
+  Question Question @relation(fields: [QuestionID], references: [ID])
+}
+
+model QuestionColumn {
+  ID           Int    @id @default(autoincrement())
+  QuestionID   Int
+  ColumnCode   String
+  ColumnText   String
+  DisplayOrder Int
+
+  Question Question @relation(fields: [QuestionID], references: [ID])
+}
+
+model QuestionSettings {
+  ID                Int  @id @default(autoincrement())
+  QuestionID        Int  @unique
+  RandomizeOptions  Boolean @default(false)
+  RandomizeRows     Boolean @default(false)
+  RandomizeColumns  Boolean @default(false)
+  MinSelections     Int?
+  MaxSelections     Int?
+
+  Question Question @relation(fields: [QuestionID], references: [ID])
+}
